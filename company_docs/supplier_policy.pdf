@@ -1,0 +1,30 @@
+Supplier Policy
+
+    This policy defines the conditions suppliers
+must satisfy before they can be selected.
+
+    The company maintains a list of currently
+approved suppliers. Approved suppliers should
+be preferred when selecting a supplier.
+
+    An unapproved supplier may only be selected
+after additional human approval.
+
+    A supplier should provide the requested product
+or service, the required quantity, the total price,
+the expected delivery time, and warranty information
+when applicable.
+
+    The supplier should meet the delivery deadline
+specified in the purchase request.
+
+    If a supplier cannot meet the required delivery
+deadline, it should normally not be recommended when
+another suitable supplier can satisfy the requirement.
+
+    Warranty length should be considered when comparing
+suppliers. When suppliers have similar prices and delivery
+times, a better warranty may be considered an advantage.
+
+    If the recommended supplier is not currently approved,
+human approval is required before the purchase can continue.

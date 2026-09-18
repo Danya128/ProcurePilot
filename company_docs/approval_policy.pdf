@@ -1,0 +1,28 @@
+Approval Policy
+
+    This policy defines when human approval is
+required before a purchase can proceed.
+
+    Purchases up to €5,000 do not require manager
+approval.
+
+    Purchases above €5,000 and up to €50,000 require
+department-manager approval.
+
+    Purchases above €50,000 require both department-manager
+and finance-manager approval.
+
+    Human approval is also required when an unapproved
+supplier is selected, when the recommended supplier
+does not meet the required delivery deadline, or when
+an exception to normal company procurement rules is
+required.
+
+    The AI Procurement Agent may determine that approval
+is required, but it cannot approve the purchase itself.
+
+    The workflow must pause until an authorized human
+approves or rejects the request.
+
+    If the purchase is rejected, the final purchase request
+must not be created.
