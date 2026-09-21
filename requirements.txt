@@ -7,3 +7,4 @@ pypdf
 chromadb
 pydantic
 python-dotenv
+streamlit
