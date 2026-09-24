@@ -24,12 +24,10 @@ def fetch_documents(knowledge_base):
     for document_file in document_files:
         with open(document_file, "rb") as file:
             is_pdf = file.read(5) == b"%PDF-"
-
-        loader = (
-            PyPDFLoader(document_file)
-            if is_pdf
-            else TextLoader(document_file, encoding="utf-8")
-        )
+            if is_pdf:
+                loader = PyPDFLoader(document_file)
+            else:
+                loader = TextLoader(document_file, encoding="utf-8")
         documents.extend(loader.load())
     return documents
 
@@ -45,16 +43,9 @@ def create_chunks(documents):
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 def create_embeddings(chunks, db_name):
     if os.path.exists(db_name):
-        return Chroma(
-            persist_directory=db_name,
-            embedding_function=embeddings,
-        )
+        return Chroma(persist_directory=db_name, embedding_function=embeddings)
 
-    return Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory=db_name,
-    )
+    return Chroma.from_documents(documents=chunks,embedding=embeddings,persist_directory=db_name)
 
 
 def process_document():
