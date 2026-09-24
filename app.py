@@ -1,4 +1,6 @@
 import streamlit as st
+import os
+import glob
 
 st.title("ProcurePilot")
 st.subheader("Purchase Request")
@@ -35,6 +37,19 @@ with col2:
         type=["pdf"],
         accept_multiple_files=True
     )
+    
+    # upload files into "quotations" folder
+    if uploaded_files:
+        for file in uploaded_files:
+            save_path = os.path.join("quotations", file.name)
+            
+            with open(save_path, "wb") as f:
+                f.write(file.getbuffer())
+        
+    # clean "uploaded_files" folder if user wish so
+    if not uploaded_files:
+        for file in glob.glob("quotations/*pdf"):
+            os.remove(file)
 
     if st.button("Analyse"):
         pass
