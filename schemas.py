@@ -1,12 +1,13 @@
-from typing import TypedDict
+from typing import TypedDict, Optional
 from pydantic import BaseModel, Field
+
 
 # What company wants to buy
 class PurchaseRequest(BaseModel):
     department: str
     item: str
     quantity: int = Field(gt=0)
-    max_budger: int = Field(gt=0)
+    max_budget: int = Field(gt=0)
     required_delivery_days: int = Field(gt=0)
     
 # Supplier's offer
@@ -34,7 +35,7 @@ class BudgetResult(BaseModel):
 class PolicyResult(BaseModel):
     content: str
     source: str
-    page: int | None = None
+    page: Optional[int] = None
     
 # Procurement Agent result
 class ProcurementState():

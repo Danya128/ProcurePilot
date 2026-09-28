@@ -1,4 +1,6 @@
 from ingestion import process_document
+from schemas import PurchaseRequest
+from tools import extract_quote_data
 
 import streamlit as st
 import os
@@ -6,7 +8,7 @@ import glob
 
 
 def main():
-    process_document()
+    #process_document()
     
     st.title("ProcurePilot")
     st.subheader("Purchase Request")
@@ -29,7 +31,7 @@ def main():
             step=100.0
         )
 
-        equired_delivery_days = st.number_input(
+        required_delivery_days = st.number_input(
             "Required delivery (days)",
             min_value=1,
             step=1
@@ -58,7 +60,17 @@ def main():
                 os.remove(file)
 
         if st.button("Analyse"):
-            pass
+            # Item request
+            request = PurchaseRequest(
+                department = department,
+                item = item, 
+                quantity = quantity,
+                max_budget = max_budget,
+                required_delivery_days = required_delivery_days
+            )
+            quotes = extract_quote_data()
+            output = str(quotes)
+            
     
     with col3:
         st.text_area(
@@ -67,6 +79,7 @@ def main():
             height = 400,
             disabled = True
         )
+    
         
 if __name__ == "__main__":
     main()
