@@ -4,9 +4,10 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import ChatOpenAI
 import glob
 
-
 llm = ChatOpenAI(model = "gpt-4.1-nano", temperature = 0)
 
+
+#Create structured Supplier Quotations 
 def extract_quote_data():
     quotes = []
     
@@ -28,3 +29,5 @@ def extract_quote_data():
         quotes.append(quote)
     
     return quotes
+
+
