@@ -27,7 +27,7 @@ class SupplierStatus(BaseModel):
 # Result of budget check tool
 class BudgetResult(BaseModel):
     department: str
-    remaining_budget: float = Field(gt=0)
+    remaining_budget: float
     requested_budget: float = Field(gt=0)
     within_budget: bool
     
