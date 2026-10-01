@@ -1,6 +1,7 @@
-from schemas import SupplierQuote, BudgetResult, PurchaseRequest
-from company_data import DEPARTMENT_BUDGETS
+from schemas import SupplierQuote, BudgetResult, PurchaseRequest, SupplierStatus
+from company_data import DEPARTMENT_BUDGETS, APPROVED_SUPPLIERS
 
+from langchain_core.tools import tool
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import ChatOpenAI
 import glob
@@ -33,6 +34,7 @@ def extract_quote_data():
 
 
 # Check the department budget
+@tool
 def check_budget(request:PurchaseRequest, quote:SupplierQuote) -> BudgetResult:
     """
     Check whether a supplier quotation is within both the department's
@@ -52,4 +54,19 @@ def check_budget(request:PurchaseRequest, quote:SupplierQuote) -> BudgetResult:
         remaining_budget = remaining_budget,
         requested_budget =  quote.total_price,
         within_budget = within_budget
+    )
+    
+    
+# Check whether a supplier is approved my company
+@tool
+def get_supplier_status(quote:SupplierQuote) -> SupplierStatus:
+    """
+    Check whether a supplier is approved by the company
+    """
+    supplier_name = quote.supplier
+    supplier_status = APPROVED_SUPPLIERS.get(supplier_name, False)
+        
+    return SupplierStatus(
+        supplier = supplier_name,
+        status = supplier_status
     )
