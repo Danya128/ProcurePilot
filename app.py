@@ -27,7 +27,7 @@ def main():
 
         max_budget = st.number_input(
             "Maximum budget (€)",
-            min_value=0.0,
+            min_value=1.0,
             step=100.0
         )
 

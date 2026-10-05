@@ -1,12 +1,16 @@
-from schemas import SupplierQuote, BudgetResult, PurchaseRequest, SupplierStatus
+from schemas import SupplierQuote, BudgetResult, PurchaseRequest, SupplierStatus, PolicyResult
 from company_data import DEPARTMENT_BUDGETS, APPROVED_SUPPLIERS
 
 from langchain_core.tools import tool
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_chroma import Chroma
 import glob
+import os
 
 llm = ChatOpenAI(model = "gpt-4.1-nano", temperature = 0)
+DB_NAME = "vector_db"
+embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
 
 #Create structured Supplier Quotations 
@@ -69,4 +73,70 @@ def get_supplier_status(quote:SupplierQuote) -> SupplierStatus:
     return SupplierStatus(
         supplier = supplier_name,
         status = supplier_status
+    )
+    
+
+# Check the company policy
+
+@tool
+def check_company_policy(request: PurchaseRequest, quote: SupplierQuote) -> PolicyResult:
+    """
+    Find relevant company policies and explain how they apply
+    to the purchase request and supplier quotation.
+    """
+    vectorstore = Chroma(persist_directory=DB_NAME, embedding_function=embeddings)
+
+    retriever = vectorstore.as_retriever()
+
+    documents = retriever.invoke(
+        f"""
+        Find company procurement policies relevant to this situation.
+
+        Purchase request:
+        Department: {request.department}
+        Item: {request.item}
+        Quantity: {request.quantity}
+        Maximum budget: {request.max_budget}
+        Required delivery: {request.required_delivery_days} days
+
+        Supplier quotation:
+        Supplier: {quote.supplier}
+        Total price: {quote.total_price}
+        Delivery: {quote.delivery_days} days
+        Warranty: {quote.warranty_month} months
+        """
+    )
+
+    policy_context = "\n\n".join(document.page_content for document in documents)
+
+    response = llm.invoke(
+        f"""
+        Analyse this supplier quotation using ONLY the company policies below.
+
+        Purchase request:
+        {request}
+
+        Supplier quotation:
+        {quote}
+
+        Relevant company policies:
+        {policy_context}
+
+        Explain which policy rules apply to this quotation
+        and whether any special requirement, such as manager approval,
+        is triggered.
+
+        Do not invent company policies.
+        """
+    )
+
+    sources = []
+    for document in documents:
+        source = os.path.basename(document.metadata.get("source", "Unknown"))
+        if source not in sources:
+            sources.append(source)
+
+    return PolicyResult(
+        content=response.content,
+        source=", ".join(sources)
     )

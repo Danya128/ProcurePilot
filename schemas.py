@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -17,7 +17,7 @@ class SupplierQuote(BaseModel):
     unit_price: float = Field(gt=0)
     total_price: float = Field(gt=0)
     delivery_days: int = Field(gt=0)
-    warranty_month: int
+    warranty_months: int
     
 # Whether the supplier is approved
 class SupplierStatus(BaseModel):
@@ -35,8 +35,12 @@ class BudgetResult(BaseModel):
 class PolicyResult(BaseModel):
     content: str
     source: str
-    page: Optional[int] = None
     
 # Procurement Agent result
-class ProcurementState():
-    pass
+class ProcurementState(BaseModel):
+    request: PurchaseRequest
+    supplier_statuses: List[SupplierStatus] = []
+    quotes: List[SupplierQuote] = []
+    budget_results: List[BudgetResult] = []
+    policy_results: List[PolicyResult] = []
+    recommendation: Optional[str] = None
