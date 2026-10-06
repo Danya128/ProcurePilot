@@ -103,7 +103,7 @@ def check_company_policy(request: PurchaseRequest, quote: SupplierQuote) -> Poli
         Supplier: {quote.supplier}
         Total price: {quote.total_price}
         Delivery: {quote.delivery_days} days
-        Warranty: {quote.warranty_month} months
+        Warranty: {quote.warranty_months} months
         """
     )
 
@@ -140,3 +140,41 @@ def check_company_policy(request: PurchaseRequest, quote: SupplierQuote) -> Poli
         content=response.content,
         source=", ".join(sources)
     )
+    
+
+def compare_suppliers(request, quotes, budget_results, supplier_statuses):
+    comparisons = []
+
+    for quote, budget, status in zip(
+        quotes,
+        budget_results,
+        supplier_statuses
+    ):
+        issues = []
+        if not budget.within_budget:
+            department_budget = budget.remaining_budget + budget.requested_budget
+            if quote.total_price > department_budget:
+                issues.append(f"Exceeds department budget by {quotes.total_price - department_budget}")
+            if quote.total_price > request.max_budget:
+                issues.append(f"Exceeds requested max budget by {quotes.total_price - request.max_budget}")
+        if not status.status:
+            issues.append("Supplier is not approved")
+        if quote.delivery_days > request.required_delivery_days:
+            issues.append(
+                f"Delivery is {quote.delivery_days - request.required_delivery_days} days late"
+            )
+
+        comparisons.append({
+            "supplier": quote.supplier,
+            "price": quote.total_price,
+            "delivery_days": quote.delivery_days,
+            "warranty_months": quote.warranty_month,
+            "within_budget": budget.within_budget,
+            "approved": status.status,
+            "meets_delivery": (
+                quote.delivery_days <= request.required_delivery_days
+            ),
+            "issues": issues
+        })
+        
+    return comparisons

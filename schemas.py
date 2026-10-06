@@ -35,12 +35,3 @@ class BudgetResult(BaseModel):
 class PolicyResult(BaseModel):
     content: str
     source: str
-    
-# Procurement Agent result
-class ProcurementState(BaseModel):
-    request: PurchaseRequest
-    supplier_statuses: List[SupplierStatus] = []
-    quotes: List[SupplierQuote] = []
-    budget_results: List[BudgetResult] = []
-    policy_results: List[PolicyResult] = []
-    recommendation: Optional[str] = None
