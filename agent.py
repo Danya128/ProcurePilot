@@ -3,7 +3,6 @@ from schemas import PurchaseRequest
 from ingestion import process_document
 
 from langchain_openai import ChatOpenAI
-from langchain_core.tools import tool
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -50,8 +49,6 @@ def generate_recommendations(request:PurchaseRequest, comparison):
 
 def run_agent(request: PurchaseRequest):
     
-    process_document()
-    
     # Extract supplier quotations
     quotes = extract_quote_data()
     
@@ -80,19 +77,7 @@ def run_agent(request: PurchaseRequest):
     print(recommendation)
     
     return {
+    "request": request.model_dump(),
     "comparison": comparison,
     "recommendation": recommendation
-}
-    
-    
-if __name__ == "__main__":
-    
-    request = PurchaseRequest(
-        department="IT",
-        item="Lenovo ThinkPad",
-        quantity=30,
-        max_budget=35000,
-        required_delivery_days=14
-    )
-    
-    run_agent(request)
+    }

@@ -1,14 +1,16 @@
 from ingestion import process_document
 from schemas import PurchaseRequest
 from tools import extract_quote_data
+from agent import run_agent
 
 import streamlit as st
 import os
 import glob
+import json
 
 
 def main():
-    #process_document()
+    process_document()
     
     st.title("ProcurePilot")
     st.subheader("Purchase Request")
@@ -68,7 +70,14 @@ def main():
                 max_budget = max_budget,
                 required_delivery_days = required_delivery_days
             )
-            output = None
+            result = run_agent(request)
+            
+            result["approval_status"] = "pending"
+            
+            with open("pending_approval.json", "w") as file:
+                json.dump(result, file, indent=4)
+                
+            output = result["recommendation"]
             
     
     with col3:
