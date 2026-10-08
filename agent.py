@@ -2,9 +2,51 @@ from tools import extract_quote_data, check_budget, get_supplier_status, check_c
 from schemas import PurchaseRequest
 from ingestion import process_document
 
+from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
+from dotenv import load_dotenv
 
+load_dotenv()
 
+def generate_recommendations(request:PurchaseRequest, comparison):
+    llm = ChatOpenAI(
+        model="gpt-4.1-nano",
+        temperature=0
+        )
+    
+    response = llm.invoke(
+        f"""
+        You are a procurement agent.
+
+        Purchase request:
+        {request}
+
+        Supplier comparisons:
+        {comparison}
+
+        Recommend the best available supplier.
+
+        Rules:
+        - If exactly one supplier meets all requirements, recommend it directly.
+        - If multiple suppliers meet all requirements, compare only those suppliers.
+        - If none meet all requirements, recommend the best available option and
+        clearly mention the unmet requirements.
+        - Do not invent information.
+
+        Keep the response concise.
+
+        Output only:
+        Recommended supplier: <name>
+
+        Reason:
+        <2-4 short sentences>
+
+        Issues:
+        <issues, or "None">
+        """
+    )
+    
+    return response.content
 
 def run_agent(request: PurchaseRequest):
     
@@ -28,27 +70,19 @@ def run_agent(request: PurchaseRequest):
         policy_results.append(policy_res)
         
     comparison = compare_suppliers(request, quotes, budget_results, supplier_statuses, policy_results)
+    recommendation = generate_recommendations(request, comparison)
     
     for supplier in comparison:
-        print("\n" + "=" * 50)
-        print(f"Supplier: {supplier['supplier']}")
-        print(f"Price: €{supplier['price']}")
-        print(f"Delivery: {supplier['delivery_days']} days")
-        print(f"Warranty: {supplier['warranty_months']} months")
-        print(f"Within budget: {supplier['within_budget']}")
-        print(f"Approved: {supplier['approved']}")
-        print(f"Meets delivery: {supplier['meets_delivery']}")
-
-        print("Issues:")
-        if supplier["issues"]:
-            for issue in supplier["issues"]:
-                print(f"  - {issue}")
-        else:
-            print("  - None")
-
         print(f"Policy source: {supplier['policy_source']}")
+    print("\n" + "=" * 50)
+    print("RECOMMENDATION")
+    print("=" * 50)
+    print(recommendation)
     
-    return comparison
+    return {
+    "comparison": comparison,
+    "recommendation": recommendation
+}
     
     
 if __name__ == "__main__":
