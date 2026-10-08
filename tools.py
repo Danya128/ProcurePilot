@@ -1,12 +1,16 @@
 from schemas import SupplierQuote, BudgetResult, PurchaseRequest, SupplierStatus, PolicyResult
 from company_data import DEPARTMENT_BUDGETS, APPROVED_SUPPLIERS
+from typing import List
 
+from dotenv import load_dotenv
 from langchain_core.tools import tool
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 import glob
 import os
+
+load_dotenv(override = True)
 
 llm = ChatOpenAI(model = "gpt-4.1-nano", temperature = 0)
 DB_NAME = "vector_db"
@@ -38,7 +42,6 @@ def extract_quote_data():
 
 
 # Check the department budget
-@tool
 def check_budget(request:PurchaseRequest, quote:SupplierQuote) -> BudgetResult:
     """
     Check whether a supplier quotation is within both the department's
@@ -62,7 +65,6 @@ def check_budget(request:PurchaseRequest, quote:SupplierQuote) -> BudgetResult:
     
     
 # Check whether a supplier is approved my company
-@tool
 def get_supplier_status(quote:SupplierQuote) -> SupplierStatus:
     """
     Check whether a supplier is approved by the company
@@ -77,8 +79,6 @@ def get_supplier_status(quote:SupplierQuote) -> SupplierStatus:
     
 
 # Check the company policy
-
-@tool
 def check_company_policy(request: PurchaseRequest, quote: SupplierQuote) -> PolicyResult:
     """
     Find relevant company policies and explain how they apply
@@ -140,23 +140,26 @@ def check_company_policy(request: PurchaseRequest, quote: SupplierQuote) -> Poli
         content=response.content,
         source=", ".join(sources)
     )
-    
 
-def compare_suppliers(request, quotes, budget_results, supplier_statuses):
+# Compare the suppliers
+def compare_suppliers(request: PurchaseRequest, quotes: List[SupplierQuote],
+    budget_results: List[BudgetResult],supplier_statuses: List[SupplierStatus],
+    policy_results: List[PolicyResult]):
     comparisons = []
 
-    for quote, budget, status in zip(
+    for quote, budget, status, policy in zip(
         quotes,
         budget_results,
-        supplier_statuses
+        supplier_statuses,
+        policy_results
     ):
         issues = []
         if not budget.within_budget:
             department_budget = budget.remaining_budget + budget.requested_budget
             if quote.total_price > department_budget:
-                issues.append(f"Exceeds department budget by {quotes.total_price - department_budget}")
+                issues.append(f"Exceeds department budget by {quote.total_price - department_budget}")
             if quote.total_price > request.max_budget:
-                issues.append(f"Exceeds requested max budget by {quotes.total_price - request.max_budget}")
+                issues.append(f"Exceeds requested max budget by {quote.total_price - request.max_budget}")
         if not status.status:
             issues.append("Supplier is not approved")
         if quote.delivery_days > request.required_delivery_days:
@@ -168,12 +171,14 @@ def compare_suppliers(request, quotes, budget_results, supplier_statuses):
             "supplier": quote.supplier,
             "price": quote.total_price,
             "delivery_days": quote.delivery_days,
-            "warranty_months": quote.warranty_month,
+            "warranty_months": quote.warranty_months,
             "within_budget": budget.within_budget,
             "approved": status.status,
             "meets_delivery": (
                 quote.delivery_days <= request.required_delivery_days
             ),
+            "policy_result": policy.content,
+            "policy_source": policy.source,
             "issues": issues
         })
         

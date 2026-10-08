@@ -68,8 +68,7 @@ def main():
                 max_budget = max_budget,
                 required_delivery_days = required_delivery_days
             )
-            quotes = extract_quote_data()
-            output = str(quotes)
+            output = None
             
     
     with col3:
