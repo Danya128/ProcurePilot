@@ -1,5 +1,6 @@
 from schemas import SupplierQuote, BudgetResult, PurchaseRequest, SupplierStatus, PolicyResult
 from company_data import DEPARTMENT_BUDGETS, APPROVED_SUPPLIERS
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from typing import List
 
 from dotenv import load_dotenv

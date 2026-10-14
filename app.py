@@ -9,14 +9,45 @@ import glob
 import json
 
 
+@st.fragment(run_every="2s")
+def show_approval_status():
+
+    if not os.path.exists("pending_approval.json"):
+        return
+
+    with open("pending_approval.json", "r") as file:
+        data = json.load(file)
+
+    status = data.get("approval_status")
+
+    if status == "pending":
+        st.warning("🟡 Waiting for manager approval")
+
+    elif status == "rejected":
+        st.error("🔴 Rejected")
+
+    elif status == "approved":
+        st.success("🟢 Approved")
+
+
 def main():
     process_document()
     
     st.title("ProcurePilot")
+    
+    if st.button("New Request"):
+        if os.path.exists("pending_approval.json"):
+            os.remove("pending_approval.json")
+            
+        st.session_state.output = ""
+
+        st.rerun()
+    
     st.subheader("Purchase Request")
 
     col1, spacer1, col2, spacer2, col3 = st.columns([3, 0.3, 2.5, 0.3, 4])
-    output = None
+    if "output" not in st.session_state:
+        st.session_state.output = ""
 
     with col1:
         department = st.text_input("Department")
@@ -77,17 +108,19 @@ def main():
             with open("pending_approval.json", "w") as file:
                 json.dump(result, file, indent=4)
                 
-            output = result["recommendation"]
+            st.session_state.output = result["recommendation"]
             
     
     with col3:
+        
+        show_approval_status()
+            
         st.text_area(
-            "",
-            value = output,
-            height = 400,
-            disabled = True
-        )
-    
+                    "",
+                    value=st.session_state.output,
+                    height = 400,
+                    disabled = True
+                )
         
 if __name__ == "__main__":
     main()
