@@ -70,6 +70,8 @@ def get_supplier_status(quote:SupplierQuote) -> SupplierStatus:
     """
     Check whether a supplier is approved by the company
     """
+    if quote.supplier not in APPROVED_SUPPLIERS:
+        supplier_status = "Is not inside the system"
     supplier_name = quote.supplier
     supplier_status = APPROVED_SUPPLIERS.get(supplier_name, False)
         
@@ -155,6 +157,8 @@ def compare_suppliers(request: PurchaseRequest, quotes: List[SupplierQuote],
         policy_results
     ):
         issues = []
+        if quote.supplier not in issues:
+            issues.append(quote.supplier)
         if not budget.within_budget:
             department_budget = budget.remaining_budget + budget.requested_budget
             if quote.total_price > department_budget:
@@ -162,11 +166,14 @@ def compare_suppliers(request: PurchaseRequest, quotes: List[SupplierQuote],
             if quote.total_price > request.max_budget:
                 issues.append(f"Exceeds requested max budget by {quote.total_price - request.max_budget}")
         if not status.status:
-            issues.append("Supplier is not approved")
+            issues.append("Supplier: is not approved")
         if quote.delivery_days > request.required_delivery_days:
             issues.append(
                 f"Delivery is {quote.delivery_days - request.required_delivery_days} days late"
             )
+        if len(issues) == 1:
+            issues.append("No issues")
+        issues.append("\n")
 
         comparisons.append({
             "supplier": quote.supplier,
@@ -178,7 +185,6 @@ def compare_suppliers(request: PurchaseRequest, quotes: List[SupplierQuote],
             "meets_delivery": (
                 quote.delivery_days <= request.required_delivery_days
             ),
-            "policy_result": policy.content,
             "policy_source": policy.source,
             "issues": issues
         })

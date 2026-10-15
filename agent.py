@@ -28,8 +28,13 @@ def generate_recommendations(request:PurchaseRequest, comparison):
         Rules:
         - If exactly one supplier meets all requirements, recommend it directly.
         - If multiple suppliers meet all requirements, compare only those suppliers.
-        - If none meet all requirements, recommend the best available option and
-        clearly mention the unmet requirements.
+        - If none meet all requirements, recommend the best available option even out of
+        these unapproved and but mention that it is the best, but it 
+        is also not approved. Don't forget to mention the unmet requirements.
+        - If the supplier is not inside the system, qualify it's status as approved, but 
+        tell the manager that this suppliers out of the system approved suppliers list, so
+        it requires extra consideration and decision to qualify if this suppliers will be 
+        approved for the company or not 
         - Do not invent information.
 
         Keep the response concise.
@@ -42,6 +47,8 @@ def generate_recommendations(request:PurchaseRequest, comparison):
 
         Issues:
         <issues, or "None">
+        
+        
         """
     )
     

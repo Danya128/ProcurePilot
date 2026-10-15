@@ -9,7 +9,7 @@ DEPARTMENT_BUDGETS = {
 
 
 APPROVED_SUPPLIERS = {
-    "TechWorld Ltd": True,
+    "TechWorld Ireland Ltd": True,
     "OfficeTech Ltd": True,
     "Digital Systems Ltd": True,
     "BudgetPC Ltd": False,
