@@ -19,6 +19,7 @@ def show_approval_status():
         data = json.load(file)
 
     status = data.get("approval_status")
+    manager_note = data.get("manager_note", "")
 
     if status == "pending":
         st.warning("🟡 Waiting for manager approval")
@@ -29,6 +30,9 @@ def show_approval_status():
     elif status == "approved":
         st.success("🟢 Approved")
 
+    if manager_note:
+        st.info(f"📝 Manager note: {manager_note}")
+
 
 def main():
     process_document()
@@ -38,7 +42,7 @@ def main():
     if st.button("New Request"):
         if os.path.exists("pending_approval.json"):
             os.remove("pending_approval.json")
-            
+
         st.session_state.output = ""
 
         st.rerun()
@@ -104,6 +108,7 @@ def main():
             result = run_agent(request)
             
             result["approval_status"] = "pending"
+            result["manager_note"] = ""
             
             with open("pending_approval.json", "w") as file:
                 json.dump(result, file, indent=4)

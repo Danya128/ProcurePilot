@@ -1,3 +1,5 @@
+from schemas import SupplierQuote
+
 import streamlit as st
 import json
 import os
@@ -62,40 +64,50 @@ def show_manager_request():
     st.write(recommendation)
 
     if status == "pending":
-
+        
         st.warning("Manager approval required")
 
+        manager_note = st.text_area(
+            "Manager note",
+            placeholder="Leave an optional note..."
+        )
+        
         col1, col2 = st.columns(2)
 
         with col1:
             if st.button("Approve"):
 
                 data["approval_status"] = "approved"
+                data["manager_note"] = manager_note.strip()
 
-                with open(
-                    "pending_approval.json", "w"
-                ) as file:
+                with open("pending_approval.json", "w") as file:
                     json.dump(data, file, indent=4)
 
                 st.success("Purchase approved")
+                st.rerun()
 
         with col2:
             if st.button("Reject"):
 
                 data["approval_status"] = "rejected"
+                data["manager_note"] = manager_note.strip()
 
-                with open(
-                    "pending_approval.json", "w"
-                ) as file:
+                with open("pending_approval.json", "w") as file:
                     json.dump(data, file, indent=4)
 
                 st.error("Purchase rejected")
+                st.rerun()
 
     elif status == "approved":
         st.success("This request has been approved.")
 
     elif status == "rejected":
         st.error("This request has been rejected.")
+
+    manager_note = data.get("manager_note", "")
+
+    if status != "pending" and manager_note:
+        st.info(f"Manager note: {manager_note}")
 
 
 show_manager_request()

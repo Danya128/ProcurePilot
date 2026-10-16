@@ -71,7 +71,7 @@ def get_supplier_status(quote:SupplierQuote) -> SupplierStatus:
     Check whether a supplier is approved by the company
     """
     if quote.supplier not in APPROVED_SUPPLIERS:
-        supplier_status = "Is not inside the system"
+        supplier_status = "The supplier is outside the system list"
     supplier_name = quote.supplier
     supplier_status = APPROVED_SUPPLIERS.get(supplier_name, False)
         
