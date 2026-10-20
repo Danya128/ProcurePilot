@@ -34,7 +34,6 @@ After analysing the available suppliers, ProcurePilot generates a recommendation
 
 A human manager remains responsible for the final approval or rejection.
 
----
 
 ## 2. What Problems Does It Solve?
 
@@ -54,6 +53,8 @@ ProcurePilot reduces this manual work by automatically extracting quotation info
 
 Instead of checking several PDFs and policy documents manually, the user receives a concise recommendation together with the relevant issues.
 
----
 
 ## 3. System Workflow
+<p align="center">
+  <img src="images/mermaid-diagram.png" alt="Workflow" width="700">
+</p>
